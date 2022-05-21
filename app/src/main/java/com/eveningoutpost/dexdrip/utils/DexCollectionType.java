@@ -259,10 +259,10 @@ public enum DexCollectionType {
             case WifiBlueToothWixel:
                 return "Network G4 and Classic xDrip";
             case DexcomG5:
-                if (Ob1G5CollectionService.usingNativeMode()) {
-                    return Ob1G5CollectionService.usingG6() ? "G6 Native" : "G5 Native";
-                }
-                return dct.name();
+                if (Ob1G5CollectionService.usingG6())
+                    return Ob1G5CollectionService.usingNativeMode() ? "G6 Native" : DexcomG6.name();
+                else //using G5
+                    return Ob1G5CollectionService.usingNativeMode() ? "G5 Native" : DexcomG5.name();
             case LibreWifi:
                 return "Network libre";
             case NSFollow:

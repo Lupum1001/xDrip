@@ -32,12 +32,16 @@ public class DexCollectionHelper {
 
             // g6 is currently a pseudo type which enables required g6 settings and then sets g5
             case DexcomG6:
-                Ob1G5CollectionService.setG6Defaults();
-
-                DexCollectionType.setDexCollectionType(DexCollectionType.DexcomG5);
-                // intentional fall thru
-
             case DexcomG5:
+                if (type == DexCollectionType.DexcomG6) {
+                    Ob1G5CollectionService.setG6Defaults();
+                    DexCollectionType.setDexCollectionType(DexCollectionType.DexcomG5);
+                }
+                else {
+                    //explicitly disable G6 sensor.
+                    Pref.setBoolean("using_g6", false);
+                }
+
                 final String pref = "dex_txid";
                 textSettingDialog(activity,
                         pref, activity.getString(R.string.dexcom_transmitter_id),

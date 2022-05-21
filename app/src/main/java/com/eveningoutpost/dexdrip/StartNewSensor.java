@@ -5,11 +5,14 @@ import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.databinding.DataBindingUtil;
 import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
+import android.text.InputType;
 import android.view.View;
 import android.widget.Button;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.eveningoutpost.dexdrip.G5Model.DexSyncKeeper;
@@ -23,6 +26,7 @@ import com.eveningoutpost.dexdrip.Services.Ob1G5CollectionService;
 import com.eveningoutpost.dexdrip.UtilityModels.CollectionServiceStarter;
 import com.eveningoutpost.dexdrip.UtilityModels.Experience;
 import com.eveningoutpost.dexdrip.UtilityModels.Pref;
+import com.eveningoutpost.dexdrip.databinding.ActivityStartNewSensorBinding;
 import com.eveningoutpost.dexdrip.profileeditor.DatePickerFragment;
 import com.eveningoutpost.dexdrip.profileeditor.ProfileAdapter;
 import com.eveningoutpost.dexdrip.profileeditor.TimePickerFragment;
@@ -37,12 +41,14 @@ import java.util.Date;
 
 import static com.eveningoutpost.dexdrip.Home.startWatchUpdaterService;
 import static com.eveningoutpost.dexdrip.Models.BgReading.AGE_ADJUSTMENT_TIME;
+import static com.eveningoutpost.dexdrip.ui.dialog.QuickSettingsDialogs.textSettingDialog;
 import static com.eveningoutpost.dexdrip.xdrip.gs;
 
 public class StartNewSensor extends ActivityWithMenu {
     // public static String menu_name = "Start Sensor";
     private static final String TAG = "StartNewSensor";
-    private Button button;
+    ActivityStartNewSensorBinding binding;
+    private Button startSensorButton;
     //private DatePicker dp;
     // private TimePicker tp;
     final Activity activity = this;
@@ -53,10 +59,17 @@ public class StartNewSensor extends ActivityWithMenu {
         super.onCreate(savedInstanceState);
         if (!Sensor.isActive()) {
             JoH.fixActionBar(this);
-            setContentView(R.layout.activity_start_new_sensor);
-            button = (Button) findViewById(R.id.startNewSensor);
+            binding = DataBindingUtil.setContentView(this,R.layout.activity_start_new_sensor);
+            //setContentView(R.layout.activity_start_new_sensor);
+            startSensorButton = (Button) findViewById(R.id.startNewSensor);
             //dp = (DatePicker)findViewById(R.id.datePicker);
             //tp = (TimePicker)findViewById(R.id.timePicker);
+
+            //((TextView)findViewById(R.id.data_source)).setText(DexCollectionType.getBestCollectorHardwareName());
+
+            binding.transmitterIdButton.setText(Pref.getString("dex_txid", "NULL"));
+
+            setUIVisibility();
             addListenerOnButton();
         } else {
             Intent intent = new Intent(this, StopSensor.class);
@@ -70,12 +83,34 @@ public class StartNewSensor extends ActivityWithMenu {
         return getString(R.string.start_sensor);
     }
 
-    public void addListenerOnButton() {
-        button = (Button) findViewById(R.id.startNewSensor);
 
-        button.setOnClickListener(new View.OnClickListener() {
+    /* Hides UI elements that aren't relevant to the current setup (i.e. don't show Dexcom settings
+     * when using a Libre)
+     * */
+    private void setUIVisibility() {
+        DexCollectionType type = DexCollectionType.getDexCollectionType();
+
+        if (type == DexCollectionType.DexcomG6 ||
+           (type == DexCollectionType.DexcomG5 && Ob1G5CollectionService.usingG6()) )
+        {   //use G6 icon. The icon is already set correctly by default
+            //binding.transmitterIdButton.setCompoundDrawablesWithIntrinsicBounds(0,R.drawable.ic_g6_transmitter,0,0);
+        }
+        else if (type == DexCollectionType.DexcomG5 || type == DexCollectionType.DexbridgeWixel ||
+            type == DexCollectionType.WifiDexBridgeWixel)
+        {   //use G4/G5 icon
+            binding.transmitterIdButton.setCompoundDrawablesWithIntrinsicBounds(0,R.drawable.ic_g4_g5_transmitter,0,0);
+        }
+        else
+        {   //hide the Dexcom Transmitter-ID settings
+            binding.dexcomTransmitter.setVisibility(View.GONE);
+        }
+    }
+
+    private void addListenerOnButton() {
+        startSensorButton = (Button) findViewById(R.id.startNewSensor);
+
+        startSensorButton.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
-
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M && DexCollectionType.hasBluetooth()) {
                     if (!LocationHelper.locationPermission(StartNewSensor.this)) {
                         LocationHelper.requestLocationForBluetooth(StartNewSensor.this);
@@ -89,6 +124,23 @@ public class StartNewSensor extends ActivityWithMenu {
         });
     }
 
+    public void editID(View view) {
+        textSettingDialog(activity,"dex_txid",
+                activity.getString(R.string.dexcom_transmitter_id),
+                activity.getString(R.string.enter_your_transmitter_id_exactly),
+                InputType.TYPE_TEXT_FLAG_NO_SUGGESTIONS | InputType.TYPE_TEXT_FLAG_CAP_CHARACTERS | InputType.TYPE_TEXT_VARIATION_VISIBLE_PASSWORD,
+                new Runnable() {
+                    @Override
+                    public void run() {
+                        // InputType.TYPE_TEXT_FLAG_CAP_CHARACTERS does not seem functional here. Change to upper-case manually
+                        binding.transmitterIdButton.setText(Pref.getString("dex_txid", "").toUpperCase());
+                        Pref.setString("dex_txid", binding.transmitterIdButton.getText().toString());
+
+                        CollectionServiceStarter.restartCollectionServiceBackground();
+                    }
+                }
+                );
+    }
 
     private void sensorButtonClick() {
         ucalendar = Calendar.getInstance(); //Default insertion time is now
@@ -240,9 +292,9 @@ public class StartNewSensor extends ActivityWithMenu {
 
     /*public void oldaddListenerOnButton() {
 
-        button = (Button)findViewById(R.id.startNewSensor);
+        startSensorButton = (Button)findViewById(R.id.startNewSensor);
 
-        button.setOnClickListener(new View.OnClickListener() {
+        startSensorButton.setOnClickListener(new View.OnClickListener() {
           public void onClick(View v) {
 
               Calendar calendar = Calendar.getInstance();
