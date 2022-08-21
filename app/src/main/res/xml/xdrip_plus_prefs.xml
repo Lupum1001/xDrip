@@ -1008,42 +1008,47 @@
         android:key="xdrip_plus_update_settings"
         android:summary="@string/automatic_updates_crash_reports_and_feedback"
         android:title="@string/xdrip_plus_update_settings">
-        <SwitchPreference
-            android:defaultValue="true"
-            android:key="auto_update_download"
-            android:summaryOff="New releases often have bugs fixed. It is recommended to switch on update notifications!"
-            android:summaryOn="@string/get_notified_of_new_apk_releases"
-            android:switchTextOff="@string/short_off_text_for_switches"
-            android:switchTextOn="@string/short_on_text_for_switches"
-            android:title="@string/automatic_update_check" />
-        <ListPreference
-            android:defaultValue="beta"
-            android:entries="@array/UpdateChannelDetail"
-            android:entryValues="@array/UpdateChannel"
-            android:key="update_channel"
-            android:shouldDisableView="true"
-            android:summary="@string/choose_stable_beta_or_alpha_releases"
-            android:title="@string/update_channel" />
-        <CheckBoxPreference
-            android:defaultValue="true"
-            android:key="enable_crashlytics"
-            android:summary="@string/send_crash_errors_to_developer"
-            android:title="@string/automatic_crash_reporting" />
-        <CheckBoxPreference
-            android:defaultValue="true"
-            android:dependency="enable_crashlytics"
-            android:key="enable_telemetry"
-            android:summary="@string/send_data_to_developers"
-            android:title="@string/enable_telemetry" />
-        <Preference
-            android:key="send_feedback"
-            android:summary="@string/web_feedback_form_for_sending_messages"
-            android:title="@string/send_feedback_message">
-            <intent
-                android:action="xdrip_plus_send_developer_feedback"
-                android:targetClass="com.eveningoutpost.dexdrip.UtilityModels.SendFeedBack"
-                android:targetPackage="@string/local_target_package" />
-        </Preference>
+            <Preference
+                android:key="version_check"
+                android:title="@string/check_for_updated_version">
+            </Preference>
+
+            <SwitchPreference
+                android:defaultValue="true"
+                android:key="auto_update_download"
+                android:summaryOff="New releases often have bugs fixed. It is recommended to switch on update notifications!"
+                android:summaryOn="@string/get_notified_of_new_apk_releases"
+                android:switchTextOff="@string/short_off_text_for_switches"
+                android:switchTextOn="@string/short_on_text_for_switches"
+                android:title="@string/automatic_update_check" />
+            <ListPreference
+                android:defaultValue="beta"
+                android:entries="@array/UpdateChannelDetail"
+                android:entryValues="@array/UpdateChannel"
+                android:key="update_channel"
+                android:shouldDisableView="true"
+                android:summary="@string/choose_stable_beta_or_alpha_releases"
+                android:title="@string/update_channel" />
+            <CheckBoxPreference
+                android:defaultValue="true"
+                android:key="enable_crashlytics"
+                android:summary="@string/send_crash_errors_to_developer"
+                android:title="@string/automatic_crash_reporting" />
+            <CheckBoxPreference
+                android:defaultValue="true"
+                android:dependency="enable_crashlytics"
+                android:key="enable_telemetry"
+                android:summary="@string/send_data_to_developers"
+                android:title="@string/enable_telemetry" />
+            <Preference
+                android:key="send_feedback"
+                android:summary="@string/web_feedback_form_for_sending_messages"
+                android:title="@string/send_feedback_message">
+                <intent
+                    android:action="xdrip_plus_send_developer_feedback"
+                    android:targetClass="com.eveningoutpost.dexdrip.UtilityModels.SendFeedBack"
+                    android:targetPackage="@string/local_target_package" />
+            </Preference>
     </PreferenceScreen>
 
     <PreferenceCategory
